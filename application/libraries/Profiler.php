@@ -57,7 +57,7 @@ class CI_Profiler
 
     public function __construct($config = array())
     {
-        $this->CI =& get_instance();
+        $this->CI = &get_instance();
         $this->CI->load->language('profiler');
 
         if (isset($config['query_toggle_count'])) {
@@ -67,13 +67,13 @@ class CI_Profiler
 
         // Default all sections to display.
         foreach ($this->_available_sections as $section) {
-            if (! isset($config[$section])) {
-                $this->_compile_{$section} = true;
+            if (!isset($config[$section])) {
+                $this->_compile_[$section] = true;
             }
         }
 
         // Make sure the Console is loaded.
-        if (! class_exists('Console')) {
+        if (!class_exists('Console')) {
             $this->load->library('Console');
         }
 
@@ -91,7 +91,7 @@ class CI_Profiler
     {
         foreach ($config as $method => $enable) {
             if (in_array($method, $this->_available_sections)) {
-                $this->_compile_{$method} = ($enable !== false);
+                $this->_compile_[$method] = ($enable !== false);
             }
         }
     }
@@ -112,7 +112,8 @@ class CI_Profiler
         foreach ($this->CI->benchmark->marker as $key => $val) {
             // Match the "end" marker so that the list ends up in the defined order.
             if (preg_match("/(.+?)_end/i", $key, $match)) {
-                if (isset($this->CI->benchmark->marker["{$match[1]}_end"])
+                if (
+                    isset($this->CI->benchmark->marker["{$match[1]}_end"])
                     && isset($this->CI->benchmark->marker["{$match[1]}_start"])
                 ) {
                     $time = $this->CI->benchmark->elapsed_time("{$match[1]}_start", $key);
@@ -148,7 +149,8 @@ class CI_Profiler
 
         // Determine the currently connected database(s).
         foreach (get_object_vars($this->CI) as $CI_object) {
-            if (is_object($CI_object)
+            if (
+                is_object($CI_object)
                 && is_subclass_of(get_class($CI_object), 'CI_DB')
             ) {
                 $dbs[] = $CI_object;
@@ -183,9 +185,8 @@ class CI_Profiler
 
                     $explain = $explainSupported
                         && stripos($val, 'SELECT') !== false
-                        && ! ($explainPartial && preg_match('/UPDATE|INSERT|DELETE/i', $val)
-                        ) ? $this->CI->db->query("EXPLAIN {$val}") : null;
-                    if (! is_null($explain)) {
+                        && !($explainPartial && preg_match('/UPDATE|INSERT|DELETE/i', $val)) ? $this->CI->db->query("EXPLAIN {$val}") : null;
+                    if (!is_null($explain)) {
                         $query .= $this->build_sql_explain($explain->row(), $time);
                     }
 
@@ -243,13 +244,13 @@ class CI_Profiler
 
         $output = array();
         foreach ($_GET as $key => $val) {
-            if (! is_numeric($key)) {
+            if (!is_numeric($key)) {
                 $key = "'{$key}'";
             }
 
             $output["&#36;_GET[{$key}]"] = is_array($val) ?
-                 "<pre>" . htmlspecialchars(stripslashes(print_r($val, true))) . "</pre>"
-                 : htmlspecialchars(stripslashes($val));
+                "<pre>" . htmlspecialchars(stripslashes(print_r($val, true))) . "</pre>"
+                : htmlspecialchars(stripslashes($val));
         }
 
         return $output;
@@ -268,7 +269,7 @@ class CI_Profiler
 
         $output = array();
         foreach ($_POST as $key => $val) {
-            if (! is_numeric($key)) {
+            if (!is_numeric($key)) {
                 $key = "'{$key}'";
             }
 
@@ -310,7 +311,8 @@ class CI_Profiler
      */
     protected function _compile_memory_usage()
     {
-        if (function_exists('memory_get_usage')
+        if (
+            function_exists('memory_get_usage')
             && '' != ($usage = memory_get_usage())
         ) {
             return number_format($usage) . ' bytes';
@@ -332,7 +334,7 @@ class CI_Profiler
         foreach (array(
             'HTTP_ACCEPT', 'HTTP_USER_AGENT', 'HTTP_CONNECTION', 'SERVER_PORT',
             'SERVER_NAME', 'REMOTE_ADDR', 'SERVER_SOFTWARE', 'HTTP_ACCEPT_LANGUAGE',
-            'SCRIPT_NAME', 'REQUEST_METHOD',' HTTP_HOST', 'REMOTE_HOST', 'CONTENT_TYPE',
+            'SCRIPT_NAME', 'REQUEST_METHOD', ' HTTP_HOST', 'REMOTE_HOST', 'CONTENT_TYPE',
             'SERVER_PROTOCOL', 'QUERY_STRING', 'HTTP_ACCEPT_ENCODING', 'HTTP_X_FORWARDED_FOR'
         ) as $header) {
             $output[$header] = isset($_SERVER[$header]) ? $_SERVER[$header] : '';
@@ -392,7 +394,7 @@ class CI_Profiler
 
     public function _compile_userdata()
     {
-        if (! isset($this->CI->session)) {
+        if (!isset($this->CI->session)) {
             return '';
         }
 
@@ -455,7 +457,7 @@ class CI_Profiler
 
         // Run each _compile_* method and add the results to the $_sections array.
         foreach ($this->_available_sections as $section) {
-            if ($this->_compile_{$section} !== false) {
+            if ($this->_compile_[$section] !== false) {
                 $func = "_compile_{$section}";
                 if ($section == 'http_headers') {
                     $section = 'headers';
